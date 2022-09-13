@@ -1,0 +1,19 @@
+---
+general:
+  resourcegroup: 
+  location: 
+  vmnet_name: 
+  vmnet_address_prefix: 
+  vmnet_subnet_name: 
+  subnet_address_prefix:
+  network_security_group_name: 
+  deploy_vm: true
+
+virtual_machine:
+  vm_name:
+  vm_size: 
+  admin_username: 
+  ssh_public_keys: 
+  publisher: 
+  sku: 
+  version: 
