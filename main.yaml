@@ -103,4 +103,5 @@
         when: {{general.deploy_vm}} == true
 
   - name: Deploy the Application
-    shell: 
+    tasks:
+        - include: deploy_app.yaml
