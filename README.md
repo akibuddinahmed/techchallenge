@@ -8,7 +8,7 @@ Follow this MS article to set ansible Azure module in your VM- https://docs.micr
   `az ad sp create-for-rbac --name <ServicePrincipalName>`
   These details are required to define the Ansible environment variables.
 
-- Setup the Service Princle to have Owner Permission in the Azure Subscription. 
+- Setup the Service Princple to have Owner Permission in the Azure Subscription. 
 
 
 ## Run the Ansible script 
@@ -17,4 +17,20 @@ Follow this MS article to set ansible Azure module in your VM- https://docs.micr
 - Run the main.yaml file 
 
 ### Key Criteria
+- This ansible codes is tested against ansible docker container.
+- If you are setting up ansible in your VM for the first time, install the following modules-
+`   apt-get update -y; \
+    apt-get install -y sshpass vim git gcc libffi-dev python3.9 python3.9-distutils libkrb5-dev; \
+    apt-get install -y python3-pip; \
+    apt-get install -y wget; \
+    apt-get install -y curl unzip jq nano; \
+    pip3 install --upgrade pip; \
+    pip3 install --upgrade virtualenv; \
+    pip3 install setuptools; \
+    pip3 install pywinrm[kerberos]; \
+    pip3 install pywinrm; \
+    pip3 install jmspath; \
+    pip3 install requests; \
+    pip3 install ansible; \ `
+- 
 
