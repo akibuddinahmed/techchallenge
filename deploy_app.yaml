@@ -3,15 +3,15 @@
   gather_facts: yes
   become: yes
   vars:
-    ansible_ssh_user: azureuser
+    ansible_ssh_user: {{virtual_machine.admin_username}}
   tasks:
     - name: copying file with playbook
       become: true 
       copy:
-        src: /Powershell_Scripts/TechChallengeApp/lib/deploy.sh
+        src: /deploy.sh
         dest: /home/azureuser
-        owner: azureuser
-        group: azureuser        
+        owner: {{virtual_machine.admin_username}}
+        group: {{virtual_machine.admin_username}}        
         mode: 0644
     - name: deploy the application in Azure VM
       environment:
