@@ -1,21 +1,18 @@
 - name: Create Azure VM
   hosts: remoteVM
-  gather_facts: yes
   become: yes
   vars:
-    ansible_ssh_user: {{virtual_machine.admin_username}}
+    ansible_ssh_user: azureuser
   tasks:
     - name: copying file with playbook
       become: true 
       copy:
-        src: /deploy.sh
+        src: /Powershell_Scripts/TechChallengeApp/lib/deploy.sh
         dest: /home/azureuser
-        owner: {{virtual_machine.admin_username}}
-        group: {{virtual_machine.admin_username}}        
+        owner: azureuser
+        group: azureuser
         mode: 0644
     - name: deploy the application in Azure VM
-      environment:
-        host_ip: 20.124.194.162 
       shell: |
         chmod 755 /home/azureuser/deploy.sh
         cd /home/azureuser/
