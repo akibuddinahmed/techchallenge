@@ -14,7 +14,7 @@ virtual_machine:
   vm_size: Standard_DS1_v2
   admin_username: azureuser
   ssh_public_keys: <>
-  image: CentOS
+  offer: CentOS
   publisher: OpenLogic
   sku: 7.5
   version: latest
