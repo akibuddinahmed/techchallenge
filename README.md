@@ -14,7 +14,7 @@ Follow this MS article to set ansible Azure module in your VM- https://docs.micr
 ## Run the Ansible script 
 - Fill in the var.yaml script with the details of the VM to be deployed. 
 - Deploy.sh script contains the Database details which requires to be filled. 
-- Run the main.yaml file 'ansible-playbook main.yaml' to deploy the Azure VM. 
+- Run the main.yaml file `ansible-playbook main.yaml` to deploy the Azure VM. 
 - Update the public IP of the deployed VM in /etc/ansible/hosts file here- [remoteVM]
 - Run the Application deployment yaml `ansible-playbook deploy_app.yaml`
 
