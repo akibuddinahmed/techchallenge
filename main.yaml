@@ -1,107 +1,90 @@
 - name: Starting the Azure Deployment play
   hosts: localhost
   connection: local
-    tasks:
-      - name: Include Vars | Initialize global vars file
-          include_vars:
-            file: "vars.yaml"
+  tasks:
+    - name: Include Vars | Initialize global vars file
+      include_vars:
+        file: "vars.yaml"
 
-      - name: Block | Starting to build VM!
-        block:
-          - name: Create resource group
-            azure_rm_resourcegroup:
-              name: {{general.resourcegroup_name}}
-              location: {{general.location}}
+    - name: 'Block | Starting to build VM!'
+      block:
+        - name: 'Create resource group'
+          azure_rm_resourcegroup:
+            name: "{{ general.resourcegroup_name }}"
+            location: "{{ general.location }}"
 
-          - name: Create virtual network
-            azure_rm_virtualnetwork:
-              resource_group: {{general.resourcegroup_name}}
-              name: {{general.vmnet_name}}
-              address_prefixes: "{{general.vmnet_address_prefix}}"
+        - name: 'Create virtual network'
+          azure_rm_virtualnetwork:
+            resource_group: "{{ general.resourcegroup_name }}"
+            name: "{{ general.vmnet_name }}"
+            address_prefixes: "{{ general.vmnet_address_prefix }}"
 
-          - name: Add subnet
-            azure_rm_subnet:
-              resource_group: {{general.resourcegroup_name}}
-              name: {{general.vmnet_subnet_name}}
-              address_prefix: "{{general.subnet_address_prefix}}"
-              virtual_network: {{general.vmnet_name}}
+        - name: 'Add subnet'
+          azure_rm_subnet:
+            resource_group: "{{ general.resourcegroup_name }}"
+            name: "{{ general.vmnet_subnet_name }}"
+            address_prefix: "{{ general.subnet_address_prefix }}"
+            virtual_network: "{{ general.vmnet_name }}"
 
-          - name: Create public IP address
-            azure_rm_publicipaddress:
-              resource_group: {{general.resourcegroup_name}}
-              allocation_method: Static
-              name: myPublicIP
-            register: output_ip_address
+        - name: 'Create public IP address'
+          azure_rm_publicipaddress:
+            resource_group: "{{ general.resourcegroup_name }}"
+            allocation_method: Static
+            name: myPublicIP
+          register: output_ip_address
 
-          - name: Public IP of VM
-            debug:
-              msg: "The public IP is {{ output_ip_address.state.ip_address }}."
+        - name: 'Public IP of VM'
+          debug:
+            msg: "The public IP is {{ output_ip_address.state.ip_address }}."
 
-          - name: Create Network Security Group that allows SSH
-            azure_rm_securitygroup:
-              resource_group: {{general.resourcegroup_name}}
-              name: {{general.network_security_group_name}}
-              rules:
-                - name: SSH
-                  protocol: Tcp
-                  destination_port_range: 22
-                  access: Allow
-                  priority: 1001
-                  direction: Inbound
-          - name: 'allow_web_traffic'
-            protocol: Tcp
-            destination_port_range:
-              - 80
-              - 443
-              - 3000
+        - name: 'Create Network Security Group that allows SSH'
+          azure_rm_securitygroup:
+            resource_group: "{{ general.resourcegroup_name }}"
+            name: "{{ general.network_security_group_name }}"
+            rules:
+              - name: custom
+                protocol: Tcp
+                destination_port_range:
+                   - 22
+                   - 80
+                   - 443
+                   - 3000
+                access: Allow
+                priority: 1001
+                direction: Inbound
 
-            access: Allow
-            priority: 1002
-            direction: Inbound
+        - name: 'Create virtual network interface card'
+          azure_rm_networkinterface:
+            resource_group: "{{ general.resourcegroup_name }}"
+            name: myNIC
+            virtual_network: "{{ general.vmnet_name }}"
+            subnet: "{{ general.vmnet_subnet_name }}"
+            public_ip_name: myPublicIP
+            security_group: "{{ general.network_security_group_name }}"
 
-          - name: 'allow_powershell_remoting'
-              protocol: Tcp
-              destination_port_range: 
-                - 5985
-                - 5986
-              access: Allow
-              priority: 1003
-              direction: Inbound
+        - name: 'Create VM'
+          azure_rm_virtualmachine:
+            resource_group: "{{general.resourcegroup_name}}"
+            name: "{{ virtual_machine.vm_name }}"
+            vm_size: "{{ virtual_machine.vm_size }}"
+            admin_username: "{{ virtual_machine.admin_username }} "
+            ssh_password_enabled: false
+            ssh_public_keys:
+              - path: /home/azureuser/.ssh/authorized_keys
+                key_data: "{{ virtual_machine.ssh_public_keys }}"
+            network_interfaces: myNIC
+            image:
+              offer: "{{virtual_machine.image}}"
+              publisher: "{{ virtual_machine.publisher }}"
+              sku: "{{ virtual_machine.sku }}"
+              version: "{{ virtual_machine.version }} "
+        - name:  'add host to the host file'
+          local_action: lineinfile 
+            path=/etc/ansible/hosts
+            regexp={{ item.name }} 
+            insertafter="[[remoteVM]]" line={{ item.name }}
+          with_items: "{{ output_ip_address.state.ip_address }}"
 
-          - name: Create virtual network interface card
-            azure_rm_networkinterface:
-              resource_group: {{general.resourcegroup_name}}
-              name: myNIC
-              virtual_network: {{general.vmnet_name}}
-              subnet: {{general.vmnet_subnet_name}}
-              public_ip_name: myPublicIP
-              security_group: {{general.network_security_group_name}}
+      when: "{{ general.deploy_vm }} == true"
 
-          - name: Create VM
-            azure_rm_virtualmachine:
-              resource_group: {{general.resourcegroup_name}}
-              name: {{virtual_machine.vm_name}}
-              vm_size: {{virtual_machine.vm_size}}
-              admin_username: {{virtual_machine.admin_username}}
-              ssh_password_enabled: false
-              ssh_public_keys:
-                - path: /home/azureuser/.ssh/authorized_keys
-                  key_data: {{virtual_machine.ssh_public_keys}}
-              network_interfaces: myNIC
-              image:
-                offer: {{virtual_machine.image}}
-                publisher: {{virtual_machine.publisher}}
-                sku: {{virtual_machine.sku}}
-                version: {{virtual_machine.version}}
-          - name:  add host to the host file
-            local_action: lineinfile 
-              path=/etc/ansible/hosts
-              regexp={{ item.name }} 
-              insertafter="[[remoteVM]]" line={{ item.name }}
-            with_items: '{{ vchosts.json.value }}'
-
-        when: {{general.deploy_vm}} == true
-
-  - name: Deploy the Application
-    tasks:
-        - include: deploy_app.yaml
+    - include_tasks: deployApp.yaml
