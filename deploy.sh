@@ -16,6 +16,6 @@ END
 )
 echo "${json}" > "/home/azureuser/dist/conf.toml"
 
-cd /dest
+cd /dist
 ./TechChallengeApp updatedb
 ./TechChallengeApp serve
