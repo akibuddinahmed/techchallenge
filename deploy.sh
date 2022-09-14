@@ -6,10 +6,10 @@ wget https://github.com/servian/TechChallengeApp/releases/download/v.0.10.0/Tech
 unzip TechChallengeApp_v.0.10.0_linux64.zip
 json=$(cat <<-END
 "DbUser" = "postgres"
-"DbPassword" = "newpassword"
-"DbName" = "feedback"
+"DbPassword" = "<PasswordHere>"
+"DbName" = "<DBnameHere"
 "DbPort" = "5432"
-"DbHost" = "localhost"
+"DbHost" = "<DBHost>"
 "ListenHost" = "localhost"
 "ListenPort" = "3000"
 END
