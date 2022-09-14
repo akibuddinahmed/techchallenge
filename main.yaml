@@ -77,7 +77,7 @@
               offer: "{{virtual_machine.image}}"
               publisher: "{{ virtual_machine.publisher }}"
               sku: "{{ virtual_machine.sku }}"
-              version: "{{ virtual_machine.version }} "
+              version: "{{ virtual_machine.version }}"
         - name:  'add host to the host file'
           local_action: lineinfile 
             path=/etc/ansible/hosts
